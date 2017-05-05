@@ -1,0 +1,16 @@
+GENERAL NOTES
+
+Any pixel whose value is "0" is transparent. Sprite data is linear in memory (e.g. 16x16 pixels will be a sequence of 128 bytes.)
+
+This sprite compiler also compresses any transparent space. It applies transparency at the nibble (half-byte) / sprite level. transparency sequences are compressed and converted to LEAX code, which is optimized by length (it uses the version of LEAX that is the most compact). as for the labels in the reference code... something like S_0L_00 means: first pixel transparent, second pixel L non-transparent, third and fourth pixels transparent since we work at the word level, there are 16 cases depending on which pixels are transparent and which are solid. It is not only faster than skipping each indivisdual gap and end-of-line, it also means a smaller code footprint.
+
+As a rule of thumb, consider that the compiled sprite will render 4.5x faster than the "pretty good sprite rendering code" from your usual 6809 programmer. Got this value from a 5000x rendering sequence.
+
+The compiled sprites will also be 4.5x the byte size (mean value from empirical tests). Your standard videogame 16x16 pixels sprite (128 bytes) will take up roughly 600 bytes (or a bit less) once compiled.
+
+This sprite compiler tries to balance speed with code size. I could have reached even higher speeds, but the generated code would be 20 to 30% bigger. Which is not always a good thing. Your sprite got fat and now weights 750 bytes.
+
+As an exercise, you can change the reference tidbits at the bottom to avoid auto-increments (for instance ",x++"). See how it has inflated the code.
+
+To calculate the size of generated code: Just save X to a variable TEMP_X before you compile. Then compile. Then TFR X,D and substract your saved variable from D (SUBD TEMP_X). The compiled sprite size in byte will be in D.
+
